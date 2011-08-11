@@ -1,0 +1,257 @@
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{pdflscape}
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage{tikz}
+\usepackage{xspace}
+
+\setcounter{tocdepth}{7}
+
+\usepackage{listingsutf8}
+\lstloadlanguages{C}
+\lstset
+{
+        language = C,
+		breaklines,
+		columns = fullflexible,
+		flexiblecolumns,
+		numbers = none,
+        basicstyle = \tt\fontsize{12pt}{12pt}\selectfont,
+        commentstyle = ,
+        showtabs = false, 
+        showspaces = false,
+        showstringspaces = false,
+        tabsize = 2,
+        inputencoding = cp1251,
+		frame = single,
+		showlines = true,
+		resetmargins = true
+}
+
+\usepackage{geometry}
+\geometry{left=2cm}
+\geometry{right=2cm}
+\geometry{top=2cm}
+\geometry{bottom=2cm}
+
+\renewcommand{\theenumi}{\arabic{enumi}.}
+\renewcommand{\theenumii}{\arabic{enumii}}
+\renewcommand{\theenumiii}{.\arabic{enumiii}}
+\renewcommand{\theenumiv}{.\arabic{enumiv}}
+
+\renewcommand{\labelenumi}{\arabic{enumi}.}
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+%\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
+%\renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
+
+% Переопределение \caption
+\makeatletter
+\renewcommand{\@biblabel}[1]{#1.}
+\renewcommand{\@makecaption}[2]{%
+\vspace{\abovecaptionskip}%
+\sbox{\@tempboxa}{#1: #2}
+\ifdim \wd\@tempboxa >\hsize
+   #1: #2\par
+\else
+   \global\@minipagefalse
+   \hbox to \hsize {\hfil \small Рисунок \thefigure~<<#2>>\hfil}%
+\fi
+\vspace{\belowcaptionskip}}
+\makeatother
+
+\newcommand{\mysection}[1]
+{
+	\clearpage
+	\section{#1}
+}
+
+\newcommand{\mysectionvn}[1]
+{
+	\clearpage
+	\section*{#1}
+}
+
+\newcommand{\mysubsection}[1]
+{
+	\subsection{#1}
+}
+
+\newcommand{\mysubsectionvn}[1]
+{
+	\subsection*{#1}
+}
+
+\newcommand{\mysubsubsection}[1]
+{
+	\subsubsection{#1}
+	\setcounter{paragraph}{0}
+	\setcounter{subparagraph}{0}
+}
+
+\newcommand{\myparagraph}[1]
+{
+	\medskip
+	\refstepcounter{paragraph}
+	{\raggedleft\bf\theparagraph\quad#1}
+	\addcontentsline{toc}{paragraph}{\theparagraph\quad#1}
+	\medskip
+	\setcounter{subparagraph}{0}
+}
+
+\newcommand{\myparagraphvn}[1]
+{
+	\medskip
+	\refstepcounter{paragraph}
+	{\bf\quad#1}
+	\medskip
+}
+
+\newcommand{\mysubparagraph}[1]
+{
+	\medskip
+	\refstepcounter{subparagraph}
+	{\raggedleft\bf\thesubparagraph\quad#1}
+	\addcontentsline{toc}{subparagraph}{\thesubparagraph\quad#1}
+	\medskip
+}
+
+\newcommand{\mysubparagraphvn}[1]
+{
+	\medskip
+	\refstepcounter{subparagraph}
+	{\bf\quad#1}
+	\medskip
+}
+
+\makeatletter
+\renewcommand{\tableofcontents}
+{
+	\clearpage
+	\par{\bf \Large \noindent \centerline{Содержание}}
+	\par
+	\@starttoc{toc}
+}
+\makeatother
+
+\makeatletter 
+\renewcommand\appendix
+{
+        \par
+        \setcounter{section}{0}
+        \gdef\thesection{\@Asbuk\c@section}
+}
+\makeatother
+
+\newcommand\myappendix[1]
+{
+		\clearpage
+        \refstepcounter{section}
+        
+        \section*{Приложение~\thesection.~#1}
+        
+        \addcontentsline{toc}{section}{Приложение~\thesection.~#1}
+}
+
+\newcommand{\mysource}[3]
+{
+        \refstepcounter{lstcon}
+		\label{src:#2}
+		{
+			\lstinputlisting[]{#1#2}
+			\nopagebreak
+			
+			\vbox{\small \centering Листинг~\thelstcon~---~Содержимое~файла~<<#3>>}
+			\bigskip
+		}
+}
+
+\newcommand{\mysourcepart}[5]
+{
+        \refstepcounter{lstcon}
+		\label{src:#3}
+		{
+			\lstinputlisting[#5]{#1#2}
+			\nopagebreak
+			
+			\vbox{\small \centering Листинг~\thelstcon~---~Функция~<<#4>>}
+			\bigskip
+		}
+}
+
+% Листинги внутри локумента
+%
+% \mylistingbegin{Метка в listing:}{Подпись}
+% \begin{lstlisting}
+% \end{listing}
+% \mylistingend
+%
+
+\newcommand{\mylistingcaption}{}
+\newcommand{\mylistinglabel}{}
+
+\newcommand{\mylistingbegin}[2]
+{
+	\refstepcounter{lstcon}
+	\renewcommand{\mylistingcaption}{\vbox{\small \centering Листинг~\thelstcon~-~#2}}
+	\renewcommand{\mylistinglabel}{\label{listing:#1}}
+	\begin{adjustwidth}{-\leftmargin}{\rightmargin}
+}
+
+\newcommand{\mylistingend}
+{
+	\mylistingcaption
+	\mylistinglabel
+	\end{adjustwidth}
+	\medskip
+}
+
+\newcommand{\mimage}[4]
+{
+	\vbox
+	{
+		\begin{center}
+
+			\refstepcounter{figure}
+			\label{image:#1}
+			
+			\includegraphics[#4]{image/#2}
+
+			\medskip
+			{\noindent \small Рисунок~\thefigure~-~#3}
+
+		\end{center}
+	}
+}
+
+\renewcommand{\thefigure}{\arabic{figure}}
+\setcounter{figure}{0}
+
+\newcounter{lstcon}
+\setcounter{lstcon}{0}
+
+\renewcommand{\theenumi}{} % \asbuk{enumi}}
+\renewcommand{\theenumii}{\arabic{enumii}}
+\renewcommand{\labelenumi}{\asbuk{enumi})}
+\renewcommand{\labelenumii}{\arabic{enumii})}
+
+\renewcommand{\labelitemi}{$-$}
+\renewcommand{\labelitemii}{$-$}
+
+\makeatletter
+\def\tableofcontents{\mysectionvn{Содержание}\@starttoc{toc}}
+\makeatother
+
+\makeatletter
+\renewcommand{\@biblabel}[1]{#1.}
+\makeatother
+
+\newcommand{\gl}{ОС GNU/Linux\xspace}
+

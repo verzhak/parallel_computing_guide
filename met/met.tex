@@ -1,0 +1,62 @@
+
+\input{various/decor}
+
+\newcounter{lr}
+\setcounter{lr}{1}
+
+\newcommand{\lr}[1]
+{
+	\mysection{#1}
+	
+		\mysubsection{Цель работы}
+		\input{lab/\thelr/aim}
+
+		\mysubsection{Введение}
+		\input{lab/\thelr/intro}
+		
+		\mysubsection{Теоретическая часть}
+		\input{lab/\thelr/theory}
+		
+		\mysubsection{Пример выполнения задания}
+		\input{lab/\thelr/example}
+		
+		\mysubsection{Требования к отчету}
+		\input{lab/\thelr/req}
+
+	\addtocounter{lr}{1}
+}
+
+\begin{document}
+
+	\input{various/title}
+	
+	\clearpage
+	\input{various/synopsis}
+	\clearpage
+
+	\tableofcontents
+
+	\mysectionvn{Введение}
+	\addcontentsline{toc}{section}{Введение}
+
+		\mysubsectionvn{Правила выполнения лабораторных работ}
+		\addcontentsline{toc}{subsection}{Правила выполнения лабораторных работ}
+
+			\input{lab/rule}
+
+		\mysubsectionvn{Задания к лабораторным работам}
+		\addcontentsline{toc}{subsection}{Задания к лабораторным работам}
+
+			\input{lab/task}
+
+	\lr{TODO OpenMP}
+	\lr{TODO OpenMPI}
+	\lr{TODO ROOT / Proof}
+	\lr{TODO Erlang}
+
+	\addcontentsline{toc}{section}{\hskip 16pt Библиография}
+	\bibliographystyle{gost780u}
+	\bibliography{various/biblio}
+
+\end{document}
+
