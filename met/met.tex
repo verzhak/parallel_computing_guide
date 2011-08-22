@@ -11,9 +11,6 @@
 		\mysubsection{Цель работы}
 		\input{lab/\thelr/aim}
 
-		\mysubsection{Введение}
-		\input{lab/\thelr/intro}
-		
 		\mysubsection{Теоретическая часть}
 		\input{lab/\thelr/theory}
 		
@@ -36,18 +33,15 @@
 
 	\tableofcontents
 
-	\mysectionvn{Введение}
-	\addcontentsline{toc}{section}{Введение}
+	\mysectionvn{Правила выполнения лабораторных работ}
+	\addcontentsline{toc}{section}{Правила выполнения лабораторных работ}
 
-		\mysubsectionvn{Правила выполнения лабораторных работ}
-		\addcontentsline{toc}{subsection}{Правила выполнения лабораторных работ}
+		\input{lab/rule}
 
-			\input{lab/rule}
+	\mysectionvn{Задания к лабораторным работам}
+	\addcontentsline{toc}{section}{Задания к лабораторным работам}
 
-		\mysubsectionvn{Задания к лабораторным работам}
-		\addcontentsline{toc}{subsection}{Задания к лабораторным работам}
-
-			\input{lab/task}
+		\input{lab/task}
 
 	\lr{Многопроцессорные системы с общей памятью. Взаимодействие процессов через разделяемую память. Стандарт OpenMP.} % OpenMP
 	\lr{Многопроцессорные системы с распределенной памятью. Вычислительные кластеры. Взаимодействие процессов путем обмена сообщениями. Стандарт Message Passing Interface (MPI). Библиотека OpenMPI.} % OpenMPI

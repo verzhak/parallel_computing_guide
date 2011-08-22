@@ -12,6 +12,7 @@
 \usepackage{amssymb,amsfonts,amsmath}
 \usepackage{tikz}
 \usepackage{xspace}
+\usepackage{changepage}
 
 \setcounter{tocdepth}{7}
 
@@ -190,7 +191,7 @@
 %
 % \mylistingbegin{Метка в listing:}{Подпись}
 % \begin{lstlisting}
-% \end{listing}
+% \end{lstlisting}
 % \mylistingend
 %
 
@@ -239,8 +240,10 @@
 
 \renewcommand{\theenumi}{} % \asbuk{enumi}}
 \renewcommand{\theenumii}{\arabic{enumii}}
+\renewcommand{\theenumiii}{\arabic{enumiii}}
 \renewcommand{\labelenumi}{\arabic{enumi})}
 \renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii})}
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii})}
 % \renewcommand{\labelenumi}{\asbuk{enumi})} % ГОСТы
 % \renewcommand{\labelenumii}{\arabic{enumii})}
 
