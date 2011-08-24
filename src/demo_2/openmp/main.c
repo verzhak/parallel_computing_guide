@@ -1,122 +1,156 @@
 
 /*
- * Умножение матриц:
- *
- * A * B = R
- *
- * Здесь:
- *
- *	A - матрица N x M;
- *	B - матрица M x N;
- *	R - матрица N x N.
- */
 
-#include "all.h"
-#include "memory.h"
+Многопоточное моделирование распределения Стьюдента с помощью датчика псевдослучайных чисел, распределенных равномерно
 
-int main()
+Сборка программы:
+
+	gcc -Wall -fopenmp -lm -lrt main.c -o demo
+
+	Здесь:
+
+		-Wall - ключ, предписывающий компилятору выводить предупреждения о всех потенциальных ошибках в программе;
+		-fopenmp - ключ, подключающий к программе функционал стандарта OpenMP, реализованный используемым компилятором;
+		-lm - ключ, подключающий к программе математическую библиотеку из состава стандартной библиотеки языка программирования C;
+		-lrt - ключ, подключающий к программе библиотеку получения информации о времени;
+		main.c - файл с исходным кодом программы;
+		-o demo - указание имени результирующего исполняемого файла.
+
+Запуск программы:
+
+	./demo TNUM FL N
+
+	Здесь:
+
+		TNUM - количество вычислительных потоков;
+		FL - число степеней свободы распределения Стьюдента (должно быть больше двух);
+		N - количество вычисляемых реализаций случайной величины, распределенной по Стьюденту.
+
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+#include <omp.h>
+
+/* Псевдослучайные числа, генерируемые функцией drand48(), равномерно распределены на диапазоне [0; 1) - функция normal_distrib() генерирует псевдослучайные числа, нормально распределенные на диапазоне (-1; 1) */
+double normal_distrib()
 {
-	int t_ind, t_num;
-	unsigned u, v, t, N = 700, M = 5000;
-	double t_R, ** A = NULL, ** B = NULL, ** R = NULL;
+
+#define X 12
+#define X_2 6
+
+	unsigned k;
+	double epsilon;
+
+	/* Центральная предельная теорема */
+
+	for(k = 0, epsilon = 0; k < X; k++)
+		epsilon += drand48();
+
+	return (epsilon - X_2) / X_2;
+}
+
+/* Главная функция программы */
+int main(const int argc, const char * argv[])
+{
+	if(argc != 4)
+	{
+		fprintf(stderr, "\nНедостаточно или избыток аргументов\n\n");
+		return -1;
+	}
+
+	unsigned u, v, t_ind, t_num, n = atoi(argv[2]), N = atoi(argv[3]);
+
+	if(n < 3)
+	{
+		fprintf(stderr, "\nЧисло степеней свободы распределения Стьюдента должно быть больше двух)\n\n");
+		return -1;
+	}
+
+	double tx, su, m = 0, d = 0, * x = calloc(N, sizeof(double));
 	struct timespec ts_before, ts_after;
 
-	if(
-		(A = (double **) alloc_2D(N, M, sizeof(double))) == NULL
-		||
-		(B = (double **) alloc_2D(M, N, sizeof(double))) == NULL
-		||
-		(R = (double **) alloc_2D(N, N, sizeof(double))) == NULL
-	  )
-	{
-		free_ND(A);
-		free_ND(B);
-		free_ND(R);
-
-		ERROR;
-	}
-
+	/* Инициализация датчика случайных чисел */
 	srand48(lrand48());
 
-	for(v = 0; v < N; v++)
-		for(u = 0; u < M; u++)
-		{
-			A[v][u] = mrand48() % 10 + drand48();
-			B[u][v] = mrand48() % 10 + drand48();
-		}
+	/* Количество вычислительных потоков устанавливается в 2 */
+	omp_set_num_threads(atoi(argv[1]));
 
-	// ############################################################################ 
-
-	omp_set_num_threads(1);
+	/* Получение количества вычислительных потоков (переменной t_num должно быть присвоено значение 2) */
 	t_num = omp_get_max_threads();
 
+	/* Определение времени начала расчетов */
 	clock_gettime(CLOCK_REALTIME, & ts_before);
 
-	#pragma omp parallel private(v, u, t, t_R)
+	/*
+	
+	Начало параллельной секции кода.
+
+	Переменные t_ind, u, v, tx, su будут составлять локальные контексты вычислительных потоков, все прочие переменные будут разделяемыми.
+
+	*/
+	#pragma omp parallel private(t_ind, u, v, tx, su)
 	{
+		/* Получение номера потока */
 		t_ind = omp_get_thread_num();
 
-		for(v = t_ind; v < N; v += t_num)
-			for(u = 0; u < N; u++)
+		/* Вычисление эмпирического математического ожидания */
+		for(u = t_ind; u < N; u += t_num)
+		{
+			/* Генерирование очередной реализации псевдослучайной величины, распределенной по Стьюденту */
+			for(v = 0, tx = 0; v < n; v++)
 			{
-				for(t = 0, t_R = 0; t < M; t++)
-					t_R += A[v][t] * B[t][u];
-
-				R[v][u] = t_R;
+				su = normal_distrib();
+				tx += su * su;
 			}
+
+			x[u] = tx = normal_distrib() / sqrt(tx / n);
+
+			/* В критической секции кода один и только один вычислительный поток в определенный момент времени увеличивает значение аккумулятора */
+			#pragma omp critical
+			{
+				m += tx;
+			}
+		}
+
+		/* Синхронизация потоков */
+		#pragma omp barrier
+
+		/* Главный вычислительный поток вычисляет эмпирическое математическое ожидание */
+		#pragma omp single
+		{
+			m /= (double) N;
+		}
+
+		/* Синхронизация потоков */
+		#pragma omp barrier
+
+		/* Вычисление эмпирической дисперсии */
+		for(u = t_ind; u < N; u += t_num)
+		{
+			tx = x[u] - m;
+
+			/* В критической секции кода один и только один вычислительный поток в определенный момент времени увеличивает значение аккумулятора */
+			#pragma omp critical
+			{
+				d += tx * tx;
+			}
+		}
 	}
 
+	/* Главный вычислительный поток вычисляет эмпирическую дисперсию */
+	d /= (double) N;
+
+	/* Определение времени окончания расчетов */
 	clock_gettime(CLOCK_REALTIME, & ts_after);
 
-	fprintf(stderr, "%d поток(а; ов) = %lf секунд(ы)\n",
-			t_num, ts_after.tv_sec - ts_before.tv_sec + 1 + (ts_after.tv_nsec - ts_before.tv_nsec) / 1000000000.0);
+	/* Вывод результатов выполненных расчетов */
+	printf("\nМатематическое ожидание:\n\n\tЭмпирическое = %lf\n\tТеоретическое = 0\n\nДисперсия:\n\n\tЭмпирическая = %lf\n\tТеоретическая = %lf\n\nРасчет выполнили %d поток(а; ов) за %lf секунд(ы)\n\n", m, d, n / (double) (n - 2), t_num, ts_after.tv_sec - ts_before.tv_sec + 1 + (ts_after.tv_nsec - ts_before.tv_nsec) / 1000000000.0);
 
-	// ############################################################################ 
-
-	dprintf(3, "#!/usr/bin/octave --silent\n\nA = [ ");
-
-	for(v = 0; v < N; v++)
-	{
-		for(u = 0; u < M - 1; u++)
-			dprintf(3, "%lf, ", A[v][u]);
-
-		dprintf(3, "%lf ", A[v][u]);
-
-		if(v < N - 1)
-			dprintf(3, "; ");
-	}
-
-	dprintf(3, "];\nB = [ ");
-
-	for(v = 0; v < M; v++)
-	{
-		for(u = 0; u < N - 1; u++)
-			dprintf(3, "%lf, ", B[v][u]);
-
-		dprintf(3, "%lf ", B[v][u]);
-
-		if(v < M - 1)
-			dprintf(3, "; ");
-	}
-
-	dprintf(3, "];\nR = [ ");
-
-	for(v = 0; v < N; v++)
-	{
-		for(u = 0; u < N - 1; u++)
-			dprintf(3, "%lf, ", R[v][u]);
-
-		dprintf(3, "%lf ", R[v][u]);
-
-		if(v < N - 1)
-			dprintf(3, "; ");
-	}
-
-	dprintf(3, "];\nmax(max(A * B - R))\n\n");
-
-	free_ND(A);
-	free_ND(B);
-	free_ND(R);
+	free(x);
 
 	return 0;
 }

@@ -31,7 +31,7 @@
         showspaces = false,
         showstringspaces = false,
         tabsize = 2,
-        inputencoding = cp1251,
+        inputencoding = utf8/cp1251,
 		frame = single,
 		showlines = true,
 		resetmargins = true
@@ -164,12 +164,12 @@
 \newcommand{\mysource}[3]
 {
         \refstepcounter{lstcon}
-		\label{src:#2}
+		\label{listing:#2}
 		{
-			\lstinputlisting[]{#1#2}
+			\lstinputlisting[]{#1}
 			\nopagebreak
 			
-			\vbox{\small \centering Листинг~\thelstcon~---~Содержимое~файла~<<#3>>}
+			\vbox{\small \centering Листинг~\thelstcon~---~#3}
 			\bigskip
 		}
 }
@@ -177,7 +177,7 @@
 \newcommand{\mysourcepart}[5]
 {
         \refstepcounter{lstcon}
-		\label{src:#3}
+		\label{listing:#3}
 		{
 			\lstinputlisting[#5]{#1#2}
 			\nopagebreak

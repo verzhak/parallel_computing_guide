@@ -4,7 +4,7 @@ FNAME = demo
 RELEASE_OUTPUT_FNAME = $(OUTPUT_DIR)/$(FNAME)
 DEBUG_OUTPUT_FNAME = $(RELEASE_OUTPUT_FNAME)_debug
 
-SRC = main.c memory.c
+SRC = main.c
 
 FLAGS = -pipe -Wall
 FLAGS_DEBUG = -g
