@@ -4,19 +4,19 @@
 %
 % Запуск моделирования:
 %
-%	1. Запуск вычислительного узла amv_2@127.0.0.1:
+%	1. Запуск вычислительного узла evm_2@127.0.0.1:
 %
-%		1.1 Запуск виртуальной машины: erl -name amv_2@127.0.0.1
+%		1.1 Запуск виртуальной машины: erl -name evm_2@127.0.0.1
 %		1.2 Компиляция модуля: c(demo).
 %
-%	2. Запуск вычислительного узла amv_1@127.0.0.1:
+%	2. Запуск вычислительного узла evm_1@127.0.0.1:
 %
-%		2.1 Запуск виртуальной машины: erl -name amv_1@127.0.0.1
+%		2.1 Запуск виртуальной машины: erl -name evm_1@127.0.0.1
 %		2.2 Компиляция модуля: c(demo)
 %
-%	3. Запуск моделирования (вычислительный узел amv_1@127.0.0.1):
+%	3. Запуск моделирования (вычислительный узел evm_1@127.0.0.1):
 %
-%		eval(TNum, Lambda, N)
+%		demo:eval(TNum, Lambda, N)
 %
 %		Здесь:
 %
@@ -46,7 +46,7 @@ eval(TNum, Lambda, N) ->
 	Pid =
 		map(fun(N_current_thread) -> spawn(demo, thread_main, [self(), Lambda, N_current_thread]) end, N_per_thread_1)
 		++
-		map(fun(N_current_thread) -> spawn('amv_2@127.0.0.1', demo, thread_main, [self(), Lambda, N_current_thread]) end, N_per_thread_2),
+		map(fun(N_current_thread) -> spawn('evm_2@127.0.0.1', demo, thread_main, [self(), Lambda, N_current_thread]) end, N_per_thread_2),
 
 	% Расчет эмпирических математического ожидания и дисперсии
 	{ M, D } = eval_main(TNum, Pid, N),
