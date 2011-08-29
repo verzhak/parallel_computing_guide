@@ -6,7 +6,7 @@
 
 \usepackage[pdftex]{graphicx}
 \usepackage{indentfirst}
-\usepackage{float}
+\usepackage{floatrow}
 \usepackage{wrapfig}
 \usepackage{pdflscape}
 \usepackage{amssymb,amsfonts,amsmath}
@@ -14,6 +14,16 @@
 \usepackage{xspace}
 \usepackage{changepage}
 \usepackage{multicol}
+\usepackage{multirow}
+\usepackage{ltxtable}
+\usepackage{fr-longtable}
+
+\newcolumntype{Z}{>{\centering\arraybackslash}p{3.3cm}}
+\newcolumntype{L}{>{\centering\arraybackslash}p{5.9cm}}
+\newcolumntype{N}{>{\centering\arraybackslash}p{2.4cm}}
+\newcolumntype{P}{>{\centering\arraybackslash}p{3cm}}
+\newcolumntype{U}{>{\centering\arraybackslash}p{2cm}}
+\newcolumntype{V}{>{\centering\arraybackslash}p{8.5cm}}
 
 \setcounter{tocdepth}{7}
 
@@ -175,19 +185,6 @@
 		}
 }
 
-\newcommand{\mysourcepart}[5]
-{
-        \refstepcounter{lstcon}
-		\label{listing:#3}
-		{
-			\lstinputlisting[#5]{#1#2}
-			\nopagebreak
-			
-			\vbox{\small \centering Листинг~\thelstcon~---~Функция~<<#4>>}
-			\bigskip
-		}
-}
-
 % Листинги внутри локумента
 %
 % \mylistingbegin{Метка в listing:}{Подпись}
@@ -202,7 +199,7 @@
 \newcommand{\mylistingbegin}[2]
 {
 	\refstepcounter{lstcon}
-	\renewcommand{\mylistingcaption}{\vbox{\small \centering Листинг~\thelstcon~-~#2}}
+	\renewcommand{\mylistingcaption}{\vbox{\small \centering Листинг~\thelstcon~---~#2}}
 	\renewcommand{\mylistinglabel}{\label{listing:#1}}
 	\begin{adjustwidth}{-\leftmargin}{\rightmargin}
 }
@@ -227,7 +224,7 @@
 			\includegraphics[#4]{image/#2}
 
 			\medskip
-			{\noindent \small Рисунок~\thefigure~-~#3}
+			{\noindent \small Рисунок~\thefigure~---~#3}
 
 		\end{center}
 	}
