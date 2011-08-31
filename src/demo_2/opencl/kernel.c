@@ -12,7 +12,7 @@
 */
 
 /* Ядро (главная функция) вычислительных потоков, рассчитывающих сумму элементов в соответствующем подмассиве массива реализаций псевдослучайной величины */
-__kernel void M(__global const float * X, unsigned N, __global const unsigned * from, __global const unsigned * to, __global float * res)
+kernel void M(__global const float * X, unsigned N, __global const unsigned * from, __global const unsigned * to, __global float * res)
 {
 	size_t t_ind = get_global_id(0);
 	unsigned u, t_to = to[t_ind];
@@ -25,7 +25,7 @@ __kernel void M(__global const float * X, unsigned N, __global const unsigned * 
 }
 
 /* Ядро (главная функция) вычислительных потоков, рассчитывающих сумму квадратов центрированных реализаций псевдослучайной величины в соответствующем подмассиве массива реализаций псевдослучайной величины */
-__kernel void D(__global const float * X, unsigned N, __global const unsigned * from, __global const unsigned * to, __global float * res,
+kernel void D(__global const float * X, unsigned N, __global const unsigned * from, __global const unsigned * to, __global float * res,
 		float M)
 {
 	size_t t_ind = get_global_id(0);

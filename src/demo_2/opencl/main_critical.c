@@ -1,7 +1,7 @@
 
 /*
 
-Многопоточное моделирование логнормального распределения с помощью датчика псевдослучайных чисел, распределенных равномерно
+Многопоточное моделирование логнормального распределения с помощью датчика псевдослучайных чисел, распределенных равномерно (реализация с использованием критических секций в коде ядра вычислительных потоков)
 
 Сборка программы:
 
@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <time.h>
 
@@ -113,19 +114,12 @@ float log_normal_distrib(float mu, float sigma)
 /* Функция, моделирующая логнормальное распределение */
 int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 {
-	size_t st_n = n;
-	unsigned u, cur_to, step = N / n, * from = malloc(n * sizeof(unsigned)), * to = malloc(n * sizeof(unsigned));
-	float * X = malloc(N * sizeof(float));
-	float rM, rD, * M = malloc(n  * sizeof(float)), * D = malloc(n  * sizeof(float));
+	size_t st_n = n, wg_s = n;
+	unsigned u, cur_to, step = N / n, * from = calloc(n, sizeof(unsigned)), * to = calloc(n, sizeof(unsigned));
+	float res[2], * X = calloc(N, sizeof(float));
 	struct timespec ts_before, ts_after;
 
-	if(
-		(X == NULL)
-		||
-		(M == NULL)
-		||
-		(D == NULL)
-	  )
+	if(X == NULL)
 		return -1;
 
 	clock_gettime(CLOCK_REALTIME, & ts_before);
@@ -151,19 +145,25 @@ int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 	cl_int err;
 	cl_uint num_dev, num_pltf;
 	cl_device_id dev_id;
-	cl_platform_id pltf_id;
+	cl_platform_id t_pltf_id[2], pltf_id;
 	cl_context context;
 	cl_command_queue com_queue;
 	cl_program prog;
-	cl_mem buf[4];
-	cl_kernel M_kernel, D_kernel;
+	cl_mem buf[2];
+	cl_kernel kernel;
 
 	/* Получение идентификатора первого из доступных OpenCL-драйверов */
-	ERROR_CL(clGetPlatformIDs(1, & pltf_id, & num_pltf));
+	ERROR_CL(clGetPlatformIDs(2, t_pltf_id, & num_pltf));
 	ERROR(! num_pltf);
 
+	/* Вычисления, по возможности, выполняются на второй (из имеющихся в системе) реализации стандарта OpenCL */
+	if(num_pltf == 1)
+		pltf_id = t_pltf_id[0];
+	else
+		pltf_id = t_pltf_id[1];
+
 	/* Получение идентификатора первого из доступных устройств, работающих через драйвер, идентификатор которого был получен ранее */
-	ERROR_CL(clGetDeviceIDs(pltf_id, CL_DEVICE_TYPE_ALL, 1, & dev_id, & num_dev));
+	ERROR_CL(clGetDeviceIDs(pltf_id, CL_DEVICE_TYPE_ALL, 2, & dev_id, & num_dev));
 	ERROR(! num_dev);
 
 	/* Создание контекста вычислений */
@@ -177,89 +177,45 @@ int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 	/* Компиляция ядер (главных функций) вычислительных потоков */
 	ERROR_CL(clBuildProgram(prog, 0, NULL, NULL, NULL, NULL));
 
-	/* Создание трех буферов, расположенных в глобальной памяти и доступных вычислительным потокам на чтение, и одного буфера, расположенного в глобальной памяти и доступного вычислительным потокам на запись, через которые будет организован канал обмена информацией между главной программой и ядрами (главными функциями) вычислительных потоков */
+	/* Создание двух буферов, расположенных в глобальной памяти и доступных вычислительным потокам на чтение, и одного буфера, расположенного в глобальной памяти и доступного вычислительным потокам на запись, через которые будет организован канал обмена информацией между главной программой и ядрами (главными функциями) вычислительных потоков */
 
 	buf[0] = clCreateBuffer(context, CL_MEM_READ_ONLY, N * sizeof(float), NULL, & err);
 	ERROR_CL(err);
 
-	buf[1] = clCreateBuffer(context, CL_MEM_READ_ONLY, n * sizeof(unsigned), NULL, & err);
-	ERROR_CL(err);
-
-	buf[2] = clCreateBuffer(context, CL_MEM_READ_ONLY, n * sizeof(unsigned), NULL, & err);
-	ERROR_CL(err);
-
-	buf[3] = clCreateBuffer(context, CL_MEM_WRITE_ONLY, n * sizeof(float), NULL, & err);
+	buf[1] = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 2 * sizeof(float), NULL, & err);
 	ERROR_CL(err);
 
 	/* Создание очереди команд в ранее созданном контексте */
 	com_queue = clCreateCommandQueue(context, dev_id, 0, & err);
 	ERROR_CL(err);
 
-	/* Получение описателя ядра M */
-	M_kernel = clCreateKernel(prog, "M", & err);
+	/* Получение описателя ядра */
+	kernel = clCreateKernel(prog, "MD", & err);
 	ERROR_CL(err);
 
-	/* Получение описателя ядра D */
-	D_kernel = clCreateKernel(prog, "D", & err);
-	ERROR_CL(err);
-
-	/* Определение фактических параметров ядер M и D */
-	clSetKernelArg(M_kernel, 0, sizeof(cl_mem), (void *) & buf[0]);
-	clSetKernelArg(D_kernel, 0, sizeof(cl_mem), (void *) & buf[0]);
-
-	clSetKernelArg(M_kernel, 1, sizeof(unsigned), (void *) & N);
-	clSetKernelArg(D_kernel, 1, sizeof(unsigned), (void *) & N);
-
-	clSetKernelArg(M_kernel, 2, sizeof(cl_mem), (void *) & buf[1]);
-	clSetKernelArg(D_kernel, 2, sizeof(cl_mem), (void *) & buf[1]);
-
-	clSetKernelArg(M_kernel, 3, sizeof(cl_mem), (void *) & buf[2]);
-	clSetKernelArg(D_kernel, 3, sizeof(cl_mem), (void *) & buf[2]);
-
-	clSetKernelArg(M_kernel, 4, sizeof(cl_mem), (void *) & buf[3]);
-	clSetKernelArg(D_kernel, 4, sizeof(cl_mem), (void *) & buf[3]);
-
-	/* Запись в буферы buf[0], buf[1] и buf[2] исходных данных (массива реализаций случайной величины, массивов границ диапазонов) */
+	/* Определение фактических параметров ядра MD */
+	clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *) & buf[0]);
+	clSetKernelArg(kernel, 1, sizeof(unsigned), (void *) & N);
+	clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *) & buf[1]);
+	
+	/* Запись в буфер buf[0] исходных данных (массива реализаций случайной величины) */
 	clEnqueueWriteBuffer(com_queue, buf[0], CL_FALSE, 0, N * sizeof(float), X, 0, NULL, NULL);
-	clEnqueueWriteBuffer(com_queue, buf[1], CL_FALSE, 0, n * sizeof(unsigned), from, 0, NULL, NULL);
-	clEnqueueWriteBuffer(com_queue, buf[2], CL_FALSE, 0, n * sizeof(unsigned), to, 0, NULL, NULL);
 
-	/* Выполнение ядра M st_n вычислительными потоками */
-	clEnqueueNDRangeKernel(com_queue, M_kernel, 1, NULL, & st_n, NULL, 0, NULL, NULL);
+	/* Выполнение ядра MD st_n вычислительными потоками, объединенными в единую группу потоков */
+	clEnqueueNDRangeKernel(com_queue, kernel, 1, NULL, & st_n, & wg_s, 0, NULL, NULL);
 
 	/* Ожидание завершения выполнения ядра всеми вычислительными потоками */
 	clFinish(com_queue);
 
-	/* Чтение из буфера buf[3] результатов выполнения ядра M */
-	clEnqueueReadBuffer(com_queue, buf[3], CL_TRUE, 0, n * sizeof(float), M, 0, NULL, NULL);
-
-	/* Расчет математического ожидания моделируемой случайной величины по результатам выполнения ядра M */
-	for(u = 0, rM = 0; u < n; u++)
-		rM += M[u];
-
-	/* Определение шестого фактического параметра ядра D - математического ожидания моделируемой случайной величины */
-	clSetKernelArg(D_kernel, 5, sizeof(unsigned), (void *) & rM);
-
-	/* Выполнение ядра D st_n вычислительными потоками */
-	clEnqueueNDRangeKernel(com_queue, D_kernel, 1, NULL, & st_n, NULL, 0, NULL, NULL);
-
-	/* Ожидание завершения выполнения ядра всеми вычислительными потоками */
-	clFinish(com_queue);
-
-	/* Чтение из буфера buf[3] результатов выполнения ядра D */
-	clEnqueueReadBuffer(com_queue, buf[3], CL_TRUE, 0, n * sizeof(float), D, 0, NULL, NULL);
-
-	/* Расчет дисперсии моделируемой случайной величины по результатам выполнения ядра D */
-	for(u = 0, rD = 0; u < n; u++)
-		rD += D[u];
+	/* Чтение из буфера buf[1] результатов выполнения ядра MD */
+	clEnqueueReadBuffer(com_queue, buf[1], CL_TRUE, 0, 2 * sizeof(float), res, 0, NULL, NULL);
 
 	/* Удаление всех использованных в данной программе экземпляров структур данных, описанных в стандарте OpenCL */
 
-	for(u = 0; u < 4; u++)
+	for(u = 0; u < 2; u++)
 		clReleaseMemObject(buf[u]);
 
-	clReleaseKernel(M_kernel);
-	clReleaseKernel(D_kernel);
+	clReleaseKernel(kernel);
 	clReleaseProgram(prog);
 	clReleaseCommandQueue(com_queue);
 	clReleaseContext(context);
@@ -270,14 +226,11 @@ int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 	clock_gettime(CLOCK_REALTIME, & ts_after);
 
 	/* Вывод результатов выполненных расчетов */
-	printf("\nМатематическое ожидание:\n\n\tЭмпирическое = %f\n\tТеоретическое = %f\n\nДисперсия:\n\n\tЭмпирическая = %f\n\tТеоретическая = %f\n\nРасчет выполнили %d поток(а; ов) за %lf секунд(ы)\n\n", rM, exp(mu + sigma * sigma / 2), rD, exp(2 * mu + sigma * sigma) * (exp(sigma * sigma) - 1),
+	printf("\nМатематическое ожидание:\n\n\tЭмпирическое = %f\n\tТеоретическое = %f\n\nДисперсия:\n\n\tЭмпирическая = %f\n\tТеоретическая = %f\n\nРасчет выполнили %d поток(а; ов) за %lf секунд(ы)\n\n",
+			res[0], exp(mu + sigma * sigma / 2), res[1], exp(2 * mu + sigma * sigma) * (exp(sigma * sigma) - 1),
 			n, ts_after.tv_sec - ts_before.tv_sec + 1 + (ts_after.tv_nsec - ts_before.tv_nsec) / 1000000000.0);
 
-	free(from);
-	free(to);
 	free(X);
-	free(M);
-	free(D);
 	free(src);
 
 	return 0;
