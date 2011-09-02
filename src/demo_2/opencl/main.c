@@ -220,18 +220,18 @@ int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 	clSetKernelArg(D_kernel, 4, sizeof(cl_mem), (void *) & buf[3]);
 
 	/* Запись в буферы buf[0], buf[1] и buf[2] исходных данных (массива реализаций случайной величины, массивов границ диапазонов) */
-	clEnqueueWriteBuffer(com_queue, buf[0], CL_FALSE, 0, N * sizeof(float), X, 0, NULL, NULL);
-	clEnqueueWriteBuffer(com_queue, buf[1], CL_FALSE, 0, n * sizeof(unsigned), from, 0, NULL, NULL);
-	clEnqueueWriteBuffer(com_queue, buf[2], CL_FALSE, 0, n * sizeof(unsigned), to, 0, NULL, NULL);
+	clEnqueueWriteBuffer(com_queue, buf[0], CL_TRUE, 0, N * sizeof(float), X, 0, NULL, NULL);
+	clEnqueueWriteBuffer(com_queue, buf[1], CL_TRUE, 0, n * sizeof(unsigned), from, 0, NULL, NULL);
+	clEnqueueWriteBuffer(com_queue, buf[2], CL_TRUE, 0, n * sizeof(unsigned), to, 0, NULL, NULL);
 
 	/* Выполнение ядра M st_n вычислительными потоками */
 	clEnqueueNDRangeKernel(com_queue, M_kernel, 1, NULL, & st_n, NULL, 0, NULL, NULL);
 
-	/* Ожидание завершения выполнения ядра всеми вычислительными потоками */
-	clFinish(com_queue);
-
 	/* Чтение из буфера buf[3] результатов выполнения ядра M */
 	clEnqueueReadBuffer(com_queue, buf[3], CL_TRUE, 0, n * sizeof(float), M, 0, NULL, NULL);
+
+	/* Ожидание завершения выполнения всеми вычислительными потоками команд, помещенных в очередь команд функциями clEnqueue* */
+	clFinish(com_queue);
 
 	/* Расчет математического ожидания моделируемой случайной величины по результатам выполнения ядра M */
 	for(u = 0, rM = 0; u < n; u++)
@@ -243,11 +243,11 @@ int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 	/* Выполнение ядра D st_n вычислительными потоками */
 	clEnqueueNDRangeKernel(com_queue, D_kernel, 1, NULL, & st_n, NULL, 0, NULL, NULL);
 
-	/* Ожидание завершения выполнения ядра всеми вычислительными потоками */
-	clFinish(com_queue);
-
 	/* Чтение из буфера buf[3] результатов выполнения ядра D */
 	clEnqueueReadBuffer(com_queue, buf[3], CL_TRUE, 0, n * sizeof(float), D, 0, NULL, NULL);
+
+	/* Ожидание завершения выполнения всеми вычислительными потоками команд, помещенных в очередь команд функциями clEnqueue* */
+	clFinish(com_queue);
 
 	/* Расчет дисперсии моделируемой случайной величины по результатам выполнения ядра D */
 	for(u = 0, rD = 0; u < n; u++)

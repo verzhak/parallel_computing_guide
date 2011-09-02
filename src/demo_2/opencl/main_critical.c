@@ -199,16 +199,16 @@ int eval(char * src, unsigned n, float mu, float sigma, unsigned N)
 	clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *) & buf[1]);
 	
 	/* Запись в буфер buf[0] исходных данных (массива реализаций случайной величины) */
-	clEnqueueWriteBuffer(com_queue, buf[0], CL_FALSE, 0, N * sizeof(float), X, 0, NULL, NULL);
+	clEnqueueWriteBuffer(com_queue, buf[0], CL_TRUE, 0, N * sizeof(float), X, 0, NULL, NULL);
 
 	/* Выполнение ядра MD st_n вычислительными потоками, объединенными в единую группу потоков */
 	clEnqueueNDRangeKernel(com_queue, kernel, 1, NULL, & st_n, & wg_s, 0, NULL, NULL);
 
-	/* Ожидание завершения выполнения ядра всеми вычислительными потоками */
-	clFinish(com_queue);
-
 	/* Чтение из буфера buf[1] результатов выполнения ядра MD */
 	clEnqueueReadBuffer(com_queue, buf[1], CL_TRUE, 0, 2 * sizeof(float), res, 0, NULL, NULL);
+
+	/* Ожидание завершения выполнения всеми вычислительными потоками команд, помещенных в очередь команд функциями clEnqueue* */
+	clFinish(com_queue);
 
 	/* Удаление всех использованных в данной программе экземпляров структур данных, описанных в стандарте OpenCL */
 
