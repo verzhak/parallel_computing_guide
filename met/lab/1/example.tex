@@ -37,31 +37,31 @@
 
 Рисунком \ref{image:openmp:build} проиллюстрирован процесс сборки демонстрационной программы. Рисунками \ref{image:openmp:demo:1}, \ref{image:openmp:demo:2} и \ref{image:openmp:demo:3} проиллюстрированы тестовые запуски демонстрационной программы, в ходе которых поставленное задание выполняли один, два и четыре вычислительных потока соответственно.
 
-%\mysource{../src/demo_2/openmp/main.c}{openmp:src}{Исходный код демонстрационной программы} % TODO раскомментировать
+\mysource{../src/demo_2/openmp/main.c}{openmp:src}{Исходный код демонстрационной программы} % TODO раскомментировать
 
 \mimage{openmp:build}{15}{Сборка демонстрационной программы}{}
 
-\begin{landscape}
-
+\newcommand{\openmpAex}[4]
+{
 	\begin{figure}
 
 		\refstepcounter{figure}
-		\label{image:openmp:demo:1}
+		\label{image:openmp:demo:#1}
 
 		\begin{tikzpicture}
 
 			\node (nv) at (0, 0) {};
 			\draw (nv.north west) + (0, 0)
-			node (htop) [anchor = north west] {\includegraphics[]{image/8.png}};
+			node (htop) [anchor = north west] {\includegraphics[]{image/#2.png}};
 			\draw (nv.north east) + (0.95\linewidth, -8.5)
-			node (run) [anchor = north east] {\includegraphics{image/16.png}};
+			node (run) [anchor = north east] {\includegraphics{image/#3.png}};
 			\draw (htop.south west) + (1.5, -2.2)
 			node [anchor = north west]
 			{
 				\begin{tabular}{c}
 		
 					Рисунок~\thefigure~---~Выполнение вычислений \\
-					одним вычислительным потоком
+					#4
 			
 				\end{tabular}
 			};
@@ -69,68 +69,13 @@
 		\end{tikzpicture}
 
 	\end{figure}
-
-\end{landscape}
+}
 
 \begin{landscape}
 
-	\begin{figure}
-
-		\refstepcounter{figure}
-		\label{image:openmp:demo:2}
-
-		\begin{tikzpicture}
-
-			\node (nv) at (0, 0) {};
-			\draw (nv.north west) + (0, 0)
-			node (htop) [anchor = north west] {\includegraphics[]{image/9.png}};
-			\draw (nv.north east) + (0.95\linewidth, -8.5)
-			node (run) [anchor = north east] {\includegraphics{image/17.png}};
-			\draw (htop.south west) + (1.5, -2.2)
-			node [anchor = north west]
-			{
-				\begin{tabular}{c}
-			
-					Рисунок~\thefigure~---~Выполнение вычислений \\
-					двумя вычислительными потоками
-				
-				\end{tabular}
-			};
-
-		\end{tikzpicture}
-
-	\end{figure}
-
-\end{landscape}
-
-\begin{landscape}
-
-	\begin{figure}
-
-		\refstepcounter{figure}
-		\label{image:openmp:demo:3}
-
-		\begin{tikzpicture}
-
-			\node (nv) at (0, 0) {};
-			\draw (nv.north west) + (0, 0)
-			node (htop) [anchor = north west] {\includegraphics[]{image/10.png}};
-			\draw (nv.north east) + (0.95\linewidth, -8.5)
-			node (run) [anchor = north east] {\includegraphics{image/18.png}};
-			\draw (htop.south west) + (1.5, -2.2)
-			node [anchor = north west]
-			{
-				\begin{tabular}{c}
-		
-					Рисунок~\thefigure~---~Выполнение вычислений \\
-					четыремя вычислительными потоками
-			
-				\end{tabular}
-			};
-
-		\end{tikzpicture}
-
-	\end{figure}
+	\openmpAex{1}{8}{16}{одним вычислительным потоком}
+	\openmpAex{2}{9}{17}{двумя вычислительными потоками}
+	\openmpAex{3}{10}{18}{четыремя вычислительными потоками}
 
 \end{landscape}
 
