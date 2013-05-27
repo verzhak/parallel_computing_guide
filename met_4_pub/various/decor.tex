@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T2A]{fontenc}
-\usepackage[english, russian]{babel}
+\usepackage[english,russian]{babel}
 
 \usepackage[pdftex]{graphicx}
 \usepackage{indentfirst}
@@ -17,7 +17,8 @@
 \usepackage{multirow}
 \usepackage{ltxtable}
 \usepackage{fr-longtable}
-\renewcommand{\rmdefault}{ftm}
+
+%\renewcommand{\rmdefault}{ftm}
 
 \newcolumntype{Z}{>{\centering\arraybackslash}p{3.3cm}}
 \newcolumntype{L}{>{\centering\arraybackslash}p{5.9cm}}
@@ -53,13 +54,7 @@
 \geometry{left=2cm}
 \geometry{right=2cm}
 \geometry{top=1.5cm}
-\geometry{bottom=3.5cm}
-
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[C]{\vskip 1.5cm \thepage}
-\renewcommand{\headrulewidth}{0pt}
+\geometry{bottom=2.5cm}
 
 \renewcommand{\baselinestretch}{1}
 
@@ -133,110 +128,74 @@
 \vspace{\belowcaptionskip}}
 \makeatother
 
-\newcommand{\mysection}[1]
+\newcommand{\mysectionlab}[1]
 {
-	\clearpage
-	\section{#1}
+	\medskip
+	{\bf Лабораторная работа № \thelr. #1}
+	\addcontentsline{toc}{section}{Лабораторная работа № \thelr. #1}
 }
 
 \newcommand{\mysectionvn}[1]
 {
-	\clearpage
-	\section*{#1}
+	\medskip
+	{\bf #1}
+	\addcontentsline{toc}{section}{#1}
 }
 
 \newcommand{\mysubsection}[1]
 {
-	\subsection{#1}
-}
-
-\newcommand{\mysubsectionvn}[1]
-{
-	\subsection*{#1}
+	\medskip
+	{\bf #1}
 }
 
 \newcommand{\mysubsubsection}[1]
 {
-	\subsubsection{#1}
-	\setcounter{paragraph}{0}
-	\setcounter{subparagraph}{0}
+	\medskip
+	{\bf #1}
 }
 
 \newcommand{\myparagraph}[1]
 {
 	\medskip
-	\refstepcounter{paragraph}
-	{\raggedleft\bf\theparagraph\quad#1}
-	\addcontentsline{toc}{paragraph}{\theparagraph\quad#1}
-	\medskip
-	\setcounter{subparagraph}{0}
-}
-
-\newcommand{\myparagraphvn}[1]
-{
-	\medskip
-	\refstepcounter{paragraph}
-	{\bf\quad#1}
-	\medskip
+	{\bf #1}
 }
 
 \newcommand{\mysubparagraph}[1]
 {
 	\medskip
-	\refstepcounter{subparagraph}
-	{\raggedleft\bf\thesubparagraph\quad#1}
-	\addcontentsline{toc}{subparagraph}{\thesubparagraph\quad#1}
-	\medskip
+	{\bf #1}
 }
-
-\newcommand{\mysubparagraphvn}[1]
-{
-	\medskip
-	\refstepcounter{subparagraph}
-	{\bf\quad#1}
-	\medskip
-}
-
-\makeatletter
-\renewcommand{\tableofcontents}
-{
-	\clearpage
-	\par{\bf \Large \noindent \centerline{Содержание}}
-	\par
-	\@starttoc{toc}
-}
-\makeatother
 
 \makeatletter 
 \renewcommand\appendix
 {
-        \par
-        \setcounter{section}{0}
-        \gdef\thesection{\@Asbuk\c@section}
+	\par
+	\setcounter{section}{0}
+	\gdef\thesection{\@Asbuk\c@section}
 }
 \makeatother
 
 \newcommand\myappendix[1]
 {
-		\clearpage
-        \refstepcounter{section}
-        
-        \section*{Приложение~\thesection.~#1}
-        
-        \addcontentsline{toc}{section}{Приложение~\thesection.~#1}
+	\clearpage
+	\refstepcounter{section}
+	
+	\section*{Приложение~\thesection.~#1}
+	
+	\addcontentsline{toc}{section}{Приложение~\thesection.~#1}
 }
 
 \newcommand{\mysource}[3]
 {
-        \refstepcounter{lstcon}
-		\label{listing:#2}
-		{
-			\lstinputlisting[]{#1}
-			\nopagebreak
-			
-			\vbox{\small \centering Листинг~\thelstcon~---~#3}
-			\bigskip
-		}
+	\refstepcounter{lstcon}
+	\label{listing:#2}
+	{
+		\lstinputlisting[]{#1}
+		\nopagebreak
+		
+		\vbox{\small \centering Листинг~\thelstcon~---~#3}
+		\bigskip
+	}
 }
 
 % Листинги внутри локумента

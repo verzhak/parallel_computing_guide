@@ -47,7 +47,7 @@ int main()
 
 	// ############################################################################ 
 
-	omp_set_num_threads(1);
+	// omp_set_num_threads(1);
 	t_num = omp_get_max_threads();
 
 	clock_gettime(CLOCK_REALTIME, & ts_before);

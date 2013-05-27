@@ -48,27 +48,28 @@
 
 \newcommand{\openmpiAex}[5]
 {
-	\mimage{openmpi:demo:#1:res}{#3}{Результат вычислений, выполненных #2 вычислительными потоками}{height=0.43\textheight}
+	\mimage{openmpi:demo:#1:res}{#3}{Результат вычислений, выполненных #2 вычислительными потоками}{width=\linewidth}
+%	\mimage{openmpi:demo:#1:res}{#3}{Результат вычислений, выполненных #2 вычислительными потоками}{height=0.36\textheight}
 
-	\begin{figure}[H]
-
-		\refstepcounter{figure}
-		\label{image:openmpi:demo:#1:htop}
-
-		\begin{multicols}{2}
-
-			\includegraphics[height=0.34\textheight]{image/n#4.png}
-			\includegraphics[height=0.34\textheight]{image/n#5.png}
-
-		\end{multicols}
-
-		\begin{center}
-
-			{\noindent \small Рисунок~\thefigure~---~Вывод утилиты htop, запущенной на удаленной вычислительной системе, в момент выполнения вычислений #2 вычислительными потоками}
-
-		\end{center}
-
-	\end{figure}
+%	\begin{figure}[H]
+%
+%		\refstepcounter{figure}
+%		\label{image:openmpi:demo:#1:htop}
+%
+%		\begin{multicols}{2}
+%
+%			\includegraphics[height=0.32\textheight]{image/n#4.png}
+%			\includegraphics[height=0.32\textheight]{image/n#5.png}
+%
+%		\end{multicols}
+%
+%		\begin{center}
+%
+%			{\noindent \small Рисунок~\thefigure~---~Вывод утилиты htop, запущенной на удаленной вычислительной системе, в момент выполнения вычислений #2 вычислительными потоками}
+%
+%		\end{center}
+%
+%	\end{figure}
 }
 
 \begin{landscape}

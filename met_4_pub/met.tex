@@ -1,0 +1,49 @@
+
+\input{various/decor}
+
+\newcounter{lr}
+\setcounter{lr}{1}
+
+\newcommand{\lr}[1]
+{
+	\mysectionlab{#1}
+	
+		\mysubsection{Цель работы}
+		\input{lab/\thelr/aim}
+
+		\mysubsection{Теоретическая часть}
+		\input{lab/\thelr/theory}
+		
+		\mysubsection{Демонстрационный пример}
+		\input{lab/\thelr/example}
+		
+		\mysubsection{Требования к оформлению отчета по лабораторной работе}
+		\input{lab/\thelr/req}
+
+	\addtocounter{lr}{1}
+}
+
+\begin{document}
+
+	\input{various/title}
+	
+	\mysectionvn{Задания к лабораторным работам}
+	\addcontentsline{toc}{section}{Задания к лабораторным работам}
+
+		\input{lab/task}
+
+	% TODO Переносы английских слов и терминов
+
+	\lr{Системы с общей памятью. Стандарт OpenMP.}
+	\lr{Системы с распределенной памятью. Стандарт MPI.}
+%	\lr{Общие вычисления на графических процессорах. Стандарт OpenCL.} % TODO
+%	\lr{Языки параллельного программирования. Язык программирования Erlang.} % TODO
+
+	\bibliographystyle{gost780}
+	\renewcommand{\refname}{\large Библиографический список}
+	\bibliography{various/biblio}
+
+	%\tableofcontents % TODO
+
+\end{document}
+
