@@ -262,12 +262,18 @@
 \renewcommand{\labelitemii}{$-$}
 
 \makeatletter
-\def\tableofcontents{\mysectionvn{Содержание}\@starttoc{toc}}
+\renewcommand{\tableofcontents}
+{
+	\clearpage
+	\par{\bf \large \noindent Содержание}
+	\par
+	\@starttoc{toc}
+}
 \makeatother
 
 \makeatletter
 \renewcommand{\@biblabel}[1]{#1.}
 \makeatother
 
-\newcommand{\gl}{ОС GNU/Linux\xspace}
+\newcommand{\gl}{ОС GNU/Lin\-ux\xspace}
 
